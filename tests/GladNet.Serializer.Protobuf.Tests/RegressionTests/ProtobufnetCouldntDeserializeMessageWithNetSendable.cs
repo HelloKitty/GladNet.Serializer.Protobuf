@@ -24,6 +24,9 @@ namespace GladNet.Serializer.Protobuf.Tests
 			registry.Register(typeof(StatusMessage));
 			registry.Register(typeof(NetSendable<>));
 			registry.Register(typeof(NetSendable<PacketPayload>));
+			registry.Register(typeof(PacketPayload));
+			registry.Register(typeof(PacketPayload));
+			registry.Register(typeof(TestPayload));
 			registry.Register(typeof(TestPayload));
 
 

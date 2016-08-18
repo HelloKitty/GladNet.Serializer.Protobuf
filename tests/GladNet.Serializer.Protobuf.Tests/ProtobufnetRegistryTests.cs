@@ -135,8 +135,11 @@ namespace GladNet.Serializer.Protobuf.Tests
 			registry.Register(typeof(TestBaseType));
 			registry.Register(typeof(TestChildTypeWithInclude2));
 			registry.Register(typeof(TestChildTypeWithInclude));
+			registry.Register(typeof(TestChildTypeWithInclude));
 			registry.Register(typeof(TestChildType));
-			
+			registry.Register(typeof(TestChildType));
+			registry.Register(typeof(TestChildType));
+
 
 			//Serialize it
 			MemoryStream ms = new MemoryStream();
@@ -146,6 +149,8 @@ namespace GladNet.Serializer.Protobuf.Tests
 
 			TestChildTypeWithInclude deserializedType = ProtoBuf.Serializer.Deserialize<TestBaseType>(ms)
 				as TestChildTypeWithInclude;
+
+			registry.Register(typeof(TestChildType2));
 
 			//assert
 			Assert.NotNull(deserializedType);
@@ -212,7 +217,8 @@ namespace GladNet.Serializer.Protobuf.Tests
 		}
 
 		[GladNetSerializationContract]
-		[GladNetSerializationInclude(GladNetIncludeIndex.Index1, typeof(TestChildType))]
+		[GladNetSerializationInclude(GladNetIncludeIndex.Index1, typeof(TestChildType), true)]
+		
 		public class TestBaseType
 		{
 
@@ -223,6 +229,14 @@ namespace GladNet.Serializer.Protobuf.Tests
 		{
 			[GladNetMember(GladNetDataIndex.Index1)]
 			public int IntField1;
+		}
+
+		[GladNetSerializationContract]
+		[GladNetSerializationInclude(GladNetIncludeIndex.Index7, typeof(TestBaseType), false)]
+		public class TestChildType2 : TestBaseType
+		{
+			[GladNetMember(GladNetDataIndex.Index2)]
+			public int IntField2;
 		}
 
 		[GladNetSerializationContract]

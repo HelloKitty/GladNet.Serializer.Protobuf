@@ -20,8 +20,6 @@ namespace GladNet.Serializer.Protobuf
 		//Must be static to surive through multiple instances
 		private static Dictionary<Type, object> registeredTypes = new Dictionary<Type, object>();
 
-		private static object syncObj = new object();
-
 		public ProtobufnetRegistry()
 		{
 			if (registeredTypes.ContainsKey(typeof(Stack<int>)))
@@ -32,9 +30,10 @@ namespace GladNet.Serializer.Protobuf
 
 			//Otherwise we need to register the stack
 			ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Stack<int>), false).SetSurrogate(typeof(StackIntSurrogate));
+			
 		}
 
-		private bool InternalRegister(Type typeToRegister)
+		public bool Register(Type typeToRegister)
 		{
 			//Ok so here the fun begins.
 			//We need a recursive algorithm for walking the graph of the Type to register each
@@ -45,29 +44,20 @@ namespace GladNet.Serializer.Protobuf
 			if (typeToRegister == null)
 				throw new ArgumentNullException(nameof(typeToRegister), $"Provided {typeToRegister} is a null arg.");
 
+			if (typeToRegister.IsEnum)
+				return true;
+
 			//Can't use isDefined exclusively but it'll fail when doing two-way subtypes
 			if (registeredTypes.ContainsKey(typeToRegister))
 				return true;
 
+			//Handles collection types
 			if (typeof(IEnumerable).IsAssignableFrom(typeToRegister) || typeToRegister.IsArray)
 				if (typeToRegister.IsArray)
 					Register(typeToRegister.GetElementType());
 				else
 					foreach (var gparam in typeToRegister.GetGenericArguments())
 						Register(gparam);
-
-			//if (RuntimeTypeModel.Default.IsDefined(typeToRegister))
-			//	return true;
-
-
-			if (typeToRegister.IsEnum)
-			{
-				MetaType enumMetaType = RuntimeTypeModel.Default.Add(typeToRegister, false);
-				enumMetaType.EnumPassthru = true;
-				enumMetaType.AsReferenceDefault = false;
-
-				return true;
-			}
 
 			//If it's not defined we need to add it.
 			if (typeToRegister.Attribute<GladNetSerializationContractAttribute>() == null)
@@ -91,17 +81,10 @@ namespace GladNet.Serializer.Protobuf
 
 			foreach (GladNetSerializationIncludeAttribute include in includes)
 			{
-				//if we don't know about the type register it
-				if (!registeredTypes.ContainsKey(include.TypeToWireTo))
-					Register(include.TypeToWireTo);
-
 				//this is the simple case; however unlike protobuf we support two-include
 				if (include != null && include.IncludeForDerived)
 				{
-					if (include.TypeToWireTo == typeModel.Type || !typeModel.Type.IsAssignableFrom(include.TypeToWireTo))
-						continue;
-					else
-						typeModel.AddSubType(include.TagID, include.TypeToWireTo);
+					typeModel.AddSubType(include.TagID, include.TypeToWireTo);
 				}
 				else
 					if (include != null && !include.IncludeForDerived)
@@ -109,7 +92,7 @@ namespace GladNet.Serializer.Protobuf
 					//this is not for mappping a base type to setup mapping for its child
 					//we need to map this child to its base
 					//so we need to get the MetaType for it
-					RuntimeTypeModel.Default[include.TypeToWireTo]
+					RuntimeTypeModel.Default.Add(include.TypeToWireTo, false)
 						.AddSubType(include.TagID, typeToRegister);
 				}
 			}
@@ -117,13 +100,6 @@ namespace GladNet.Serializer.Protobuf
 			registeredTypes.Add(typeToRegister, null);
 
 			return true;
-		}
-
-		public bool Register(Type typeToRegister)
-		{
-			lock (syncObj)
-				return InternalRegister(typeToRegister);
-			
 		}
 	}
 }
