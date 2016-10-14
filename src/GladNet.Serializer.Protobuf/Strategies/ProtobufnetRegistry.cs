@@ -70,7 +70,8 @@ namespace GladNet.Serializer.Protobuf
 			{
 				int tagID = mi.Attribute<GladNetMemberAttribute>().TagID;
 
-				typeModel.Add(mi.Attribute<GladNetMemberAttribute>().TagID, mi.Name);
+				if (typeModel[tagID] == null)
+					typeModel.Add(mi.Attribute<GladNetMemberAttribute>().TagID, mi.Name);
 
 				//Now we might need to register this type aswell.
 				//Recur to try to register this type
@@ -96,8 +97,11 @@ namespace GladNet.Serializer.Protobuf
 					//this is not for mappping a base type to setup mapping for its child
 					//we need to map this child to its base
 					//so we need to get the MetaType for it
-					RuntimeTypeModel.Default[include.TypeToWireTo]
-						.AddSubType(include.TagID, typeToRegister);
+
+					//If the include is not yet known about (check the index)
+					if(RuntimeTypeModel.Default[include.TypeToWireTo][include.TagID] == null)
+						RuntimeTypeModel.Default[include.TypeToWireTo]
+							.AddSubType(include.TagID, typeToRegister);
 				}
 			}
 

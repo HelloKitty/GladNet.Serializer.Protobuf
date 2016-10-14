@@ -15,6 +15,7 @@ namespace GladNet.Serializer.Protobuf.Tests
 	public class CollectionSerializationRegressionTest
 	{
 		[Test]
+		[RequiresSTAAttribute]
 		public void Test_Can_Serialize_Payloads_With_Collections()
 		{
 			ProtobufnetSerializerStrategy serializer = new ProtobufnetSerializerStrategy();
