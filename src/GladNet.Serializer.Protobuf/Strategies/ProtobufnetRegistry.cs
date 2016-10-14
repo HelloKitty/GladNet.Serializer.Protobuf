@@ -84,9 +84,6 @@ namespace GladNet.Serializer.Protobuf
 
 			foreach (GladNetSerializationIncludeAttribute include in includes)
 			{
-				//Before doing anything we should register the include type first
-				this.Register(include.TypeToWireTo);
-
 				//this is the simple case; however unlike protobuf we support two-include
 				if (include.IncludeForDerived)
 				{
