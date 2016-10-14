@@ -139,6 +139,7 @@ namespace GladNet.Serializer.Protobuf.Tests
 			registry.Register(typeof(TestChildType));
 			registry.Register(typeof(TestChildType));
 			registry.Register(typeof(TestChildType));
+			registry.Register(typeof(TestChildType2));
 
 
 			//Serialize it
@@ -148,9 +149,7 @@ namespace GladNet.Serializer.Protobuf.Tests
 			ms.Position = 0; //need to reset the stream
 
 			TestChildTypeWithInclude deserializedType = ProtoBuf.Serializer.Deserialize<TestBaseType>(ms)
-				as TestChildTypeWithInclude;
-
-			registry.Register(typeof(TestChildType2));
+				as TestChildTypeWithInclude;	
 
 			//assert
 			Assert.NotNull(deserializedType);
