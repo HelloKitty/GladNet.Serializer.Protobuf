@@ -17,9 +17,9 @@ namespace GladNet.Serializer.Protobuf.Tests
 			ProtobufnetRegistry registry = new ProtobufnetRegistry();
 
 			registry.Register(typeof(NetworkMessage));
-			registry.Register(typeof(RequestMessage));
-			registry.Register(typeof(RequestMessage));
 			registry.Register(typeof(EventMessage));
+			registry.Register(typeof(RequestMessage));
+			registry.Register(typeof(RequestMessage));
 			registry.Register(typeof(ResponseMessage));
 			registry.Register(typeof(StatusMessage));
 			registry.Register(typeof(NetSendable<>));

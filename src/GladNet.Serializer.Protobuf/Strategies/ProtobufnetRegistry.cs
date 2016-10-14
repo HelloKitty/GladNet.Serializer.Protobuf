@@ -47,7 +47,7 @@ namespace GladNet.Serializer.Protobuf
 			if (typeToRegister.IsEnum)
 				return true;
 
-			//Can't use isDefined exclusively but it'll fail when doing two-way subtypes
+			//Can't use isDefined exclusively because it'll fail when doing two-way subtypes
 			if (registeredTypes.ContainsKey(typeToRegister))
 				return true;
 
@@ -68,6 +68,8 @@ namespace GladNet.Serializer.Protobuf
 			//Add each member
 			foreach (MemberInfo mi in typeToRegister.MembersWith<GladNetMemberAttribute>(MemberTypes.Field | MemberTypes.Property, Flags.InstanceAnyDeclaredOnly)) //keep this declare only because of Unity3D serialization issues with NetSendable
 			{
+				int tagID = mi.Attribute<GladNetMemberAttribute>().TagID;
+
 				typeModel.Add(mi.Attribute<GladNetMemberAttribute>().TagID, mi.Name);
 
 				//Now we might need to register this type aswell.
@@ -81,18 +83,20 @@ namespace GladNet.Serializer.Protobuf
 
 			foreach (GladNetSerializationIncludeAttribute include in includes)
 			{
+				//Before doing anything we should register the include type first
+				this.Register(include.TypeToWireTo);
+
 				//this is the simple case; however unlike protobuf we support two-include
-				if (include != null && include.IncludeForDerived)
+				if (include.IncludeForDerived)
 				{
 					typeModel.AddSubType(include.TagID, include.TypeToWireTo);
 				}
 				else
-					if (include != null && !include.IncludeForDerived)
 				{
 					//this is not for mappping a base type to setup mapping for its child
 					//we need to map this child to its base
 					//so we need to get the MetaType for it
-					RuntimeTypeModel.Default.Add(include.TypeToWireTo, false)
+					RuntimeTypeModel.Default[include.TypeToWireTo]
 						.AddSubType(include.TagID, typeToRegister);
 				}
 			}
