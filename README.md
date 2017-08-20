@@ -4,4 +4,4 @@ GladNet2 serialization API implemented around Marc Gravell's Protobuf-net implem
 
 # Deprecated
 
-Go to https://github.com/HelloKitty/GladNet2.0. The GladNet2 repo now contains the serializer.
+Go to https://github.com/HelloKitty/GladNet2. The GladNet2 repo now contains the serializer.
